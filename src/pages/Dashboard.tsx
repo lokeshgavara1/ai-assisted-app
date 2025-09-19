@@ -1,16 +1,24 @@
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { RecentActivityCard } from '@/components/dashboard/RecentActivityCard';
 import { Plus, BarChart3, Calendar, Users, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    // Simulate loading state
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const stats = [
     { title: 'Total Followers', value: '12.3K', change: '+12%', icon: Users },
@@ -20,95 +28,44 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary">BizBoost</h1>
-            <span className="text-muted-foreground">Dashboard</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">
-              Welcome back, {user.user_metadata?.full_name || user.email}!
-            </span>
-            <Button variant="outline" onClick={signOut}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Quick Actions */}
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <h1 className="text-2xl font-bold">Welcome back!</h1>
             <p className="text-muted-foreground">
-              Manage your social media presence from one place
+              Here's what's happening with your social media today
             </p>
           </div>
-          <Button className="flex items-center space-x-2">
+          <Button onClick={() => navigate('/create')} className="flex items-center space-x-2">
             <Plus className="w-4 h-4" />
-            <span>Create Post</span>
+            <span className="hidden sm:inline">Create Post</span>
           </Button>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-accent">{stat.change}</span> from last month
-                </p>
-              </CardContent>
-            </Card>
+            <StatCard
+              key={index}
+              title={stat.title}
+              value={stat.value}
+              change={stat.change}
+              icon={stat.icon}
+              loading={loading}
+            />
           ))}
         </div>
 
         {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Recent Activity */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>
-                Your latest posts and engagement
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                      <Calendar className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">Post scheduled for tomorrow</p>
-                      <p className="text-sm text-muted-foreground">
-                        Facebook, Instagram • 2 hours ago
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">124 reactions</p>
-                      <p className="text-xs text-muted-foreground">+12 from avg</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="lg:col-span-2">
+            <RecentActivityCard loading={loading} />
+          </div>
 
-          {/* Quick Stats */}
+          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
@@ -117,19 +74,35 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/create')}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Post
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/calendar')}
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule Content
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/analytics')}
+              >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Analytics
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/menu')}
+              >
                 <Users className="w-4 h-4 mr-2" />
                 Manage Accounts
               </Button>
@@ -148,13 +121,17 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p>No scheduled posts yet</p>
+              <p className="text-lg font-medium">No scheduled posts yet</p>
               <p className="text-sm">Create your first post to get started</p>
+              <Button className="mt-4" onClick={() => navigate('/create')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Post
+              </Button>
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
