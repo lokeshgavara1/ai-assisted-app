@@ -3,22 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ai-assisted-app</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>BizBoost - AI-Powered Social Media Management</title>
+    <meta name="description" content="Streamline your social media with AI content generation, smart scheduling, and analytics. Perfect for businesses and creators." />
+    <meta name="author" content="BizBoost" />
+    <meta name="theme-color" content="#6366F1" />
+    <link rel="manifest" href="/manifest.json" />
 
-    <meta property="og:title" content="ai-assisted-app" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- SEO Meta Tags -->
+    <meta property="og:title" content="BizBoost - AI Social Media Management Platform" />
+    <meta property="og:description" content="Create, schedule, and analyze social media content with AI. Boost your online presence effortlessly." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:title" content="BizBoost - AI Social Media Management" />
+    <meta name="twitter:description" content="AI-powered social media management for businesses and creators" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- PWA Support -->
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register service worker for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('SW registered'))
+            .catch(() => console.log('SW registration failed'));
+        });
+      }
+    </script>
   </body>
 </html>
