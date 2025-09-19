@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      generated_content: {
+        Row: {
+          content_type: string
+          created_at: string
+          generated_text: string
+          id: string
+          is_favorite: boolean
+          platform: string | null
+          prompt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          generated_text: string
+          id?: string
+          is_favorite?: boolean
+          platform?: string | null
+          prompt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          generated_text?: string
+          id?: string
+          is_favorite?: boolean
+          platform?: string | null
+          prompt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_drafts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          hashtags: string[] | null
+          id: string
+          image_url: string | null
+          platforms: string[]
+          scheduled_at: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          image_url?: string | null
+          platforms?: string[]
+          scheduled_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          image_url?: string | null
+          platforms?: string[]
+          scheduled_at?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
