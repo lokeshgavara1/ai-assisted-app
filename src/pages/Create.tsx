@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Image, Type, Hash, Save, Eye } from 'lucide-react';
+import { Plus, Image, Type, Hash, Save, Eye, X } from 'lucide-react';
 import AIContentGenerator from '@/components/content/AIContentGenerator';
+import AIImageGenerator from '@/components/content/AIImageGenerator';
+import ImageUploadDropzone from '@/components/content/ImageUploadDropzone';
 import PlatformPreview from '@/components/content/PlatformPreview';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +23,8 @@ const Create = () => {
     title: '',
     caption: '',
     hashtags: '',
-    platforms: [] as string[]
+    platforms: [] as string[],
+    imageUrl: ''
   });
   const [previewPlatform, setPreviewPlatform] = useState<'facebook' | 'instagram' | 'linkedin' | 'twitter'>('facebook');
 
@@ -61,6 +64,20 @@ const Create = () => {
         hashtags: hashtagLines.join(' ').trim()
       }));
     }
+    setActiveTab('create');
+  };
+
+  const handleImageUploaded = (imageUrl: string, imageId?: string) => {
+    setFormData(prev => ({ ...prev, imageUrl }));
+    setActiveTab('create');
+    toast({
+      title: "Image Added!",
+      description: "Image has been added to your post.",
+    });
+  };
+
+  const handleImageGenerated = (imageUrl: string, imageId?: string) => {
+    setFormData(prev => ({ ...prev, imageUrl }));
     setActiveTab('create');
   };
 
@@ -118,9 +135,10 @@ const Create = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="create">Create</TabsTrigger>
-            <TabsTrigger value="ai">AI Generator</TabsTrigger>
+            <TabsTrigger value="ai">AI Text</TabsTrigger>
+            <TabsTrigger value="image">AI Images</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>
 
@@ -216,7 +234,7 @@ const Create = () => {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Hash className="h-5 w-5" />
-                        AI Content Generator
+                        AI Text Generator
                       </CardTitle>
                       <CardDescription>
                         Generate captions and hashtags with AI
@@ -225,28 +243,57 @@ const Create = () => {
                     <CardContent>
                       <Button className="w-full" variant="outline">
                         <Plus className="w-4 h-4 mr-2" />
-                        Generate with AI
+                        Generate Text
                       </Button>
                     </CardContent>
                   </Card>
 
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow opacity-50">
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('image')}>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Image className="h-5 w-5" />
-                        Image Upload
+                        AI Image Generator
                       </CardTitle>
                       <CardDescription>
-                        Upload images for your post (Coming Soon)
+                        Generate custom images with DALL·E 3
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Button className="w-full" variant="outline" disabled>
+                      <Button className="w-full" variant="outline">
                         <Plus className="w-4 h-4 mr-2" />
-                        Upload Image
+                        Generate Image
                       </Button>
                     </CardContent>
                   </Card>
+
+                  {formData.imageUrl && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Image className="h-5 w-5" />
+                          Current Image
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="aspect-square overflow-hidden rounded-lg bg-muted">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Selected image"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mt-3"
+                          onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Remove Image
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               </div>
             </div>
@@ -254,6 +301,19 @@ const Create = () => {
 
           <TabsContent value="ai">
             <AIContentGenerator onContentGenerated={handleContentGenerated} />
+          </TabsContent>
+
+          <TabsContent value="image" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Upload Images</h3>
+                <ImageUploadDropzone onImageUploaded={handleImageUploaded} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Generate with AI</h3>
+                <AIImageGenerator onImageGenerated={handleImageGenerated} />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="preview" className="space-y-6">
@@ -277,6 +337,7 @@ const Create = () => {
                 platform={previewPlatform}
                 caption={formData.caption}
                 hashtags={formData.hashtags}
+                imageUrl={formData.imageUrl}
                 userName="Your Business"
               />
 
