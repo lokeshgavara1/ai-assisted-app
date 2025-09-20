@@ -1,10 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CalendarView } from '@/components/calendar/CalendarView';
+import { UpcomingPosts } from '@/components/calendar/UpcomingPosts';
+import { CalendarDays, Plus, Grid3X3, List } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface ScheduledPost {
+  id: string;
+  title?: string;
+  caption?: string;
+  platforms: string[];
+  scheduled_at: string;
+  status: string;
+  image_url?: string;
+}
 
 const Calendar = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [posts, setPosts] = useState<ScheduledPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('post_drafts')
+        .select('*')
+        .eq('status', 'scheduled')
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+
+      setPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      toast({
+        title: "Failed to Load Posts",
+        description: "Could not load your scheduled posts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -15,34 +62,32 @@ const Calendar = () => {
               Schedule and manage your social media posts
             </p>
           </div>
-          <Button>
+          <Button onClick={() => navigate('/create')}>
             <Plus className="w-4 h-4 mr-2" />
             Schedule Post
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5" />
-              Upcoming Posts
-            </CardTitle>
-            <CardDescription>
-              Your scheduled content for the next 7 days
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <CalendarDays className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p className="text-lg font-medium">No scheduled posts</p>
-              <p className="text-sm">Start scheduling content to see it here</p>
-              <Button className="mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Schedule Your First Post
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="calendar" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <Grid3X3 className="w-4 h-4" />
+              Calendar View
+            </TabsTrigger>
+            <TabsTrigger value="list" className="flex items-center gap-2">
+              <List className="w-4 h-4" />
+              List View
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calendar">
+            <CalendarView posts={posts} onPostsUpdate={fetchPosts} />
+          </TabsContent>
+
+          <TabsContent value="list">
+            <UpcomingPosts posts={posts} onPostsUpdate={fetchPosts} />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

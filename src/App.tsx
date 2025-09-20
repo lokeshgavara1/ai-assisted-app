@@ -10,6 +10,7 @@ import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
+import Scheduler from "./pages/Scheduler";
 import Calendar from "./pages/Calendar";
 import Analytics from "./pages/Analytics";
 import Menu from "./pages/Menu";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<Create />} />
+            <Route path="/scheduler" element={<Scheduler />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/menu" element={<Menu />} />

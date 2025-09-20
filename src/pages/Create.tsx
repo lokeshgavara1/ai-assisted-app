@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Image, Type, Hash, Save, Eye, X } from 'lucide-react';
+import { Plus, Image, Type, Hash, Save, Eye, X, Calendar } from 'lucide-react';
 import AIContentGenerator from '@/components/content/AIContentGenerator';
 import AIImageGenerator from '@/components/content/AIImageGenerator';
 import ImageUploadDropzone from '@/components/content/ImageUploadDropzone';
@@ -17,6 +18,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Create = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('create');
   const [formData, setFormData] = useState({
@@ -348,6 +350,24 @@ const Create = () => {
                 <Button onClick={saveDraft}>
                   <Save className="w-4 h-4 mr-2" />
                   Save Draft
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/scheduler', { 
+                    state: { 
+                      postData: { 
+                        title: formData.title, 
+                        caption: formData.caption, 
+                        hashtags: formData.hashtags, 
+                        image_url: formData.imageUrl, 
+                        platforms: formData.platforms 
+                      } 
+                    } 
+                  })}
+                  disabled={!formData.caption.trim()}
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Schedule
                 </Button>
               </div>
             </div>

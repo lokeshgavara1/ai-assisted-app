@@ -92,6 +92,17 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Platform Brand Colors */
+    --facebook: 221 83% 53%; /* Facebook Blue */
+    --instagram: 315 100% 50%; /* Instagram Magenta */
+    --linkedin: 201 100% 35%; /* LinkedIn Blue */
+    --twitter: 203 89% 53%; /* Twitter Blue */
+    
+    /* Status Colors */
+    --warning: 48 96% 53%; /* #F59E0B Amber */
+    --success: 158 64% 52%; /* #10B981 Emerald */
+    --error: 0 84.2% 60.2%; /* #EF4444 Red */
   }
 }
 

@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Platform brand colors
+        facebook: "hsl(var(--facebook))",
+        instagram: "hsl(var(--instagram))",
+        linkedin: "hsl(var(--linkedin))",
+        twitter: "hsl(var(--twitter))",
+        // Status colors
+        warning: "hsl(var(--warning))",
+        success: "hsl(var(--success))",
+        error: "hsl(var(--error))",
       },
       borderRadius: {
         lg: "var(--radius)",
