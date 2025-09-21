@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Image, Type, Hash, Save, Eye, X, Calendar } from 'lucide-react';
+import { Plus, Image, Type, Hash, Save, Eye, X, Calendar, Send, Loader2 } from 'lucide-react';
 import AIContentGenerator from '@/components/content/AIContentGenerator';
 import AIImageGenerator from '@/components/content/AIImageGenerator';
 import ImageUploadDropzone from '@/components/content/ImageUploadDropzone';
@@ -21,6 +21,7 @@ const Create = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('create');
+  const [isPublishing, setIsPublishing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     caption: '',
@@ -123,6 +124,116 @@ const Create = () => {
         description: "Failed to save draft. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const publishNow = async () => {
+    if (!formData.caption.trim()) {
+      toast({
+        title: "Caption required",
+        description: "Please add a caption for your post",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.platforms.length === 0) {
+      toast({
+        title: "Select platforms",
+        description: "Please select at least one platform to publish to",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPublishing(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to publish posts",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First save the post to database
+      const { data: post, error: postError } = await supabase
+        .from('posts')
+        .insert({
+          user_id: user.id,
+          title: formData.title || null,
+          caption: formData.caption,
+          hashtags: formData.hashtags.split(/\s+/).filter(tag => tag.startsWith('#')),
+          platforms: formData.platforms,
+          image_url: formData.imageUrl || null,
+          status: 'published'
+        })
+        .select()
+        .single();
+
+      if (postError) {
+        console.error('Error saving post:', postError);
+        toast({
+          title: "Error saving post",
+          description: "There was an error saving your post. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then publish to social media platforms
+      const { data, error } = await supabase.functions.invoke('publish-post', {
+        body: {
+          postId: post.id,
+          platforms: formData.platforms
+        }
+      });
+
+      if (error) {
+        console.error('Error publishing post:', error);
+        toast({
+          title: "Error publishing",
+          description: "There was an error publishing your post. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const results = data?.results || [];
+      const successfulPosts = results.filter((r: any) => r.status === 'success');
+      const failedPosts = results.filter((r: any) => r.status === 'failed');
+
+      if (successfulPosts.length > 0) {
+        toast({
+          title: "Post published!",
+          description: `Successfully published to ${successfulPosts.map((p: any) => p.platform).join(', ')}`,
+        });
+      }
+
+      if (failedPosts.length > 0) {
+        toast({
+          title: "Some posts failed",
+          description: `Failed to publish to ${failedPosts.map((p: any) => p.platform).join(', ')}`,
+          variant: "destructive",
+        });
+      }
+
+      // Navigate to analytics or dashboard
+      navigate('/analytics');
+
+    } catch (error) {
+      console.error('Error publishing post:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -347,7 +458,7 @@ const Create = () => {
                 <Button onClick={() => setActiveTab('create')} variant="outline">
                   Back to Edit
                 </Button>
-                <Button onClick={saveDraft}>
+                <Button onClick={saveDraft} variant="outline">
                   <Save className="w-4 h-4 mr-2" />
                   Save Draft
                 </Button>
@@ -368,6 +479,14 @@ const Create = () => {
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule
+                </Button>
+                <Button onClick={publishNow} disabled={isPublishing || !formData.caption.trim() || formData.platforms.length === 0}>
+                  {isPublishing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  {isPublishing ? "Publishing..." : "Publish Now"}
                 </Button>
               </div>
             </div>
