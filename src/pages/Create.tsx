@@ -204,8 +204,8 @@ const Create = () => {
       }
 
       const results = data?.results || [];
-      const successfulPosts = results.filter((r: any) => r.status === 'success');
-      const failedPosts = results.filter((r: any) => r.status === 'failed');
+      const successfulPosts = results.filter((r: any) => r.success);
+      const failedPosts = results.filter((r: any) => !r.success);
 
       if (successfulPosts.length > 0) {
         toast({
